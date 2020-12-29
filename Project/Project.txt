@@ -1,0 +1,206 @@
+#include "mbed.h"
+#include "Ping.h"
+#include "TextLCD.h"
+#include "keypad.h"
+
+Serial pc(USBTX, USBRX);//UART
+DigitalOut Pins[] = { (LED1), (LED2), (LED3) };// LED1 for distance, LED2 for LDR, LED3 for Temperature.
+TextLCD lcd(p13, p14, p17, p18, p19, p20); // rs, e, d[4-7].
+BusOut Display(p22, p23, p24, p25, p26, p27, p28);
+Keypad keypad(p8, p7, p6, p5, p12, p11, p10, p9);//Columns, Rows.
+AnalogIn LDR(A1);// A1 = A0.1 p16.
+AnalogIn Potentiometer(A0);// A0 = A0.0 p15.
+Ping p(p21); //Ping object.
+
+char input, key;
+double Temperature, ADC_Result;
+int range, ii = 0;
+int PassKey = 0;
+int hide = 0;
+int PassCount = 0;
+char Password[8];
+char TruePassword[9] = "741A8520";//Here you can change the password. And remember to change line #187 "PassCount"
+
+/*_________________________________________________________________*/
+
+void Temperature_Calc() {
+    Temperature = Potentiometer.read() * 50;//To limit the temperature [0-50]C.
+}
+
+void Print_Number(int number) { // 0 is ON, 1 is OFF.
+    if (number == 0)
+        Display = 0b0100000;
+    if (number == 1)
+        Display = 0b0101111;
+    if (number == 2)
+        Display = 0b0010010;
+    if (number == 3)
+        Display = 0b0000110;
+    if (number == 4)
+        Display = 0b0001101;
+    if (number == 5)
+        Display = 0b1000100;
+    if (number == 6)
+        Display = 0b1000000;
+    if (number == 7)
+        Display = 0b0101110;
+    if (number == 8)
+        Display = 0b0000000;
+    if (number == 9)
+        Display = 0b0000100;
+}
+
+void Hide_Show() {//Hide_Show was separated from Read_Input for security purposes so that the user won't be able to access temperature till he types the password.
+    if (pc.readable()) {// if the user pressed a key.
+        input = pc.getc();
+        if (input == 'h') {
+            lcd.locate(0, 1);
+            hide = 1;
+            for (int j = 0; j < ii; j++)
+                lcd.printf("*");
+        }
+        if (input == 's') {
+            hide = 0;
+            lcd.locate(0, 1);
+            for (int j = 0; j < ii; j++)
+                lcd.printf("%c", Password[j]);
+        }
+    }
+}
+
+void Read_Input() {
+    if (pc.readable()) {// if the user pressed a key.
+        input = pc.getc();
+        if (input == 'd') {
+            lcd.cls();//Clear LCD in go to (0,0) location on the LCD.
+            lcd.printf("Distance:");
+            lcd.locate(0, 1);
+            lcd.printf("%d CM", range);
+            pc.printf("The distance = %d cm\n\r", range);
+            if (range < 30)
+                pc.printf("Be careful! Too close.\n\r");
+        }
+        if (input == 't') {
+            lcd.cls();//Clear LCD in go to (0,0) location on the LCD.
+            lcd.printf("Temp:");
+            lcd.locate(0, 1);
+            lcd.printf("%.2f C", Temperature);
+            pc.printf("The temperature = %.2f C\n\r", Temperature);
+            if (Temperature > 35)
+                pc.printf("Be careful! The temperature is high.\n\r");
+        }
+        if (input == 'c') {
+            pc.printf("Timer started, you will not have access to the system until the timer finishes.\n\r");
+            for (int i = 0; i < 10; i++) {
+                Print_Number(i);
+                wait(1);
+            }
+            Display = 0b1111111;    //Turn OFF 7segments LEDs.
+        }
+    }
+}
+
+void Tempreture_Distance_Check() {
+    Temperature_Calc();
+    if (Temperature > 35) {//Hot
+        Pins[2] = 1;
+        wait(0.3);
+    }
+    if (Temperature <= 35) {//Normal.
+        Pins[2] = 0;
+    }
+    p.Send();
+    wait_ms(30);
+    range = p.Read_cm();
+    if (range < 30) {
+        Pins[0] = 1;
+        wait(0.3);
+    }
+    if (range <= 30) {
+        Pins[0] = 0;
+    }
+}
+
+void LDR_Check() {
+    if (LDR.read() < 0.48)
+        Pins[1] = 1;
+    else
+        Pins[1] = 0;
+}
+
+void print_Output() {
+    pc.printf("|_______________________________________________________________\n\r");
+    pc.printf("|    Powering ON the system");
+    for (int i = 0; i < 4; i++) {
+        pc.printf(".");
+        wait(0.7);
+    }
+    pc.printf("\n\r");
+    wait(0.1);
+    Temperature_Calc();
+    pc.printf("|    The temperature is : %.2f \n\r", Temperature);
+    if (Temperature > 35) //Hot
+        pc.printf("|    It is hot outside, try to keep the RPM below 4. \n\r");
+    if (Temperature <= 15) //Cold.
+        pc.printf("|    It is cold outside remember to warm the engine. \n\r");
+
+    pc.printf("|    The time is : ");
+    LDR_Check();
+    if (Pins[1] == 0)
+        pc.printf("Day\n\r");
+    else
+        pc.printf("Night\n\r");
+    pc.printf("|    Press 'd' to print the distance\n\r");
+    pc.printf("|    Press 't' to print the temperature\n\r");
+    pc.printf("|    Press 'c' to start the timer\n\r");
+    pc.printf("|_______________________________________________________________\n\r");
+}
+
+void User_Login() {
+    pc.baud(9600); // Baud rate. 
+    pc.format(8, SerialBase::None, 1); // 8-bits, no parity, 1 stop bit.
+    pc.printf("Enter the password using the Keypad\n\r");
+    lcd.printf("Password");
+    lcd.locate(0, 1);
+    pc.printf("Enter 'h' to hide the password\n\r");
+    pc.printf("Enter 's' to show the password\n\r");
+}
+
+void Keypad_Init() {
+    while (PassKey == 0) {
+        Hide_Show();
+        key = keypad.getKey();
+        if (key != KEY_RELEASED) {
+            Password[ii] = key;
+            if (hide == 0)
+                lcd.printf("%c", Password[ii]);
+            if (hide == 1)
+                lcd.printf("*");
+            ii = ii + 1;
+            wait(0.6);
+
+            for (int i = 0; i < ii; i++) {
+                if (TruePassword[i] == Password[i]) {
+                    PassCount = PassCount + 1;
+                }
+            }
+            if (PassCount == 36)
+                PassKey = 1;
+        }
+    }
+    pc.printf("Access Granted!\n\r");
+    print_Output(); //Print it if the password is True.
+}
+/*_________________________________________________________________*/
+int main() {
+    User_Login();
+    Display = 0b1111111;    //Turn OFF 7segments LEDs.
+    while (1) {
+        if (PassKey == 0)
+            Keypad_Init();
+        Temperature_Calc();
+        Read_Input();
+        Tempreture_Distance_Check();
+        LDR_Check();
+    }
+}
