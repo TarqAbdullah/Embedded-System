@@ -1,0 +1,22 @@
+#include "mbed.h"
+
+
+
+int main() {
+        LPC_SC -> PCONP |= 1 << 12; // to power up ADC
+        LPC_PINCON -> PINSEL1 |= 1<<14; // to change the function to AD0.0.
+        LPC_ADC -> ADCR = (1<<0) | (1<<21) | (1<<16) | (1<<10); // SEL , PDN , CLKDIV , 
+        LPC_GPIO1 -> FIODIR |= 1<< 18; // To change the direction of the LED.
+        int x ;
+        while(1){
+            
+            x = LPC_ADC -> ADDR0>> 4 & 4095 ; //to read ANDing with all 1's which equals 4059
+            //printf("%d ", x);
+            if( x < 3000 ){
+                LPC_GPIO1 -> FIOSET = 1 << 18;  //if the analog input is higher than 2000 the LED will be ON.
+                }else{
+                    LPC_GPIO1 -> FIOCLR = 1 << 18;
+                    }
+            } 
+            
+}

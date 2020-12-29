@@ -1,0 +1,141 @@
+#include "mbed.h"
+
+
+int main() {
+    LPC_GPIO0 -> FIODIR &= ~(1<<25);
+    LPC_GPIO0 -> FIODIR &= ~(1<<26);
+    LPC_GPIO1 -> FIODIR &= ~(1<<30);
+    LPC_GPIO1 -> FIODIR &= ~(1<<31);
+    /***************/
+    LPC_PINCON -> PINSEL3 |= 1<<15 ; //pin 1.23
+    LPC_PINCON -> PINSEL3 |= 1<<5 ; //pin 1.18
+    LPC_PWM1->MR0 = 5000;     //Period length.
+    LPC_PWM1->MR4 = 0;      
+    LPC_PWM1->MR1 = 0; 
+    LPC_PWM1->TCR |= (1 << 0)|(1<<3); // PWM Enable.
+    LPC_PWM1->PCR |= (1 << 12) | (1<<9); //Single edge for SEL Enable.
+    
+    while(1) {
+        int p17 = (LPC_GPIO0 -> FIOPIN & (1<<25) ) >> 25;
+        int p18 = (LPC_GPIO0 -> FIOPIN & (1<<26) ) >> 26;
+        int p19 = (LPC_GPIO1 -> FIOPIN & (1<<30) ) >> 30;
+        int p20 = (LPC_GPIO1 -> FIOPIN & (1<<31) ) >> 31;
+        
+        if( p17 == 1 & p18 == 1 & p19 == 1 & p20 == 1){ //0000 Highest Green
+            LPC_PWM1->MR1 = 6400;
+            LPC_PWM1 -> LER |= 1 << 1;
+            LPC_PWM1->MR4 = 0;
+            LPC_PWM1 -> LER |= 1 << 4; 
+            wait(0.8);
+            }
+        if( p17 == 1 & p18 == 1 & p19 == 1 & p20 == 0){ //0001
+            LPC_PWM1->MR1 = 3200;
+            LPC_PWM1 -> LER |= 1 << 1;
+            LPC_PWM1->MR4 = 0;
+            LPC_PWM1 -> LER |= 1 << 4; 
+            wait(0.8);
+            }
+        if( p17 == 1 & p18 == 1 & p19 == 0 & p20 == 1){ //0010
+            LPC_PWM1->MR1 = 1600;
+            LPC_PWM1 -> LER |= 1 << 1;
+            LPC_PWM1->MR4 = 0;
+            LPC_PWM1 -> LER |= 1 << 4; 
+            wait(0.8);
+            }
+        if( p17 == 1 & p18 == 1 & p19 == 0 & p20 == 0){ //0011
+            LPC_PWM1->MR1 = 800;
+            LPC_PWM1 -> LER |= 1 << 1;
+            LPC_PWM1->MR4 = 0;
+            LPC_PWM1 -> LER |= 1 << 4; 
+            wait(0.8);
+            }
+        if( p17 == 1 & p18 == 0 & p19 == 1 & p20 == 1){ //0100
+            LPC_PWM1->MR1 = 400;
+            LPC_PWM1 -> LER |= 1 << 1;
+            LPC_PWM1->MR4 = 0;
+            LPC_PWM1 -> LER |= 1 << 4; 
+            wait(0.8);
+            }
+        if( p17 == 1 & p18 == 0 & p19 == 1 & p20 == 0){ //0101
+            LPC_PWM1->MR1 = 200;
+            LPC_PWM1 -> LER |= 1 << 1;
+            LPC_PWM1->MR4 = 0;
+            LPC_PWM1 -> LER |= 1 << 4; 
+            wait(0.8);
+            }
+        if( p17 == 1 & p18 == 0 & p19 == 0 & p20 == 1){ //0110
+            LPC_PWM1->MR1 = 100;
+            LPC_PWM1 -> LER |= 1 << 1;
+            LPC_PWM1->MR4 = 0;
+            LPC_PWM1 -> LER |= 1 << 4; 
+            wait(0.8);
+            }
+        if( p17 == 1 & p18 == 0 & p19 == 0 & p20 == 0){ //0111 Lowest Green
+            LPC_PWM1->MR1 = 10;
+            LPC_PWM1 -> LER |= 1 << 1;
+            LPC_PWM1->MR4 = 0;
+            LPC_PWM1 -> LER |= 1 << 4; 
+            wait(0.8);
+            }
+        /***************************/
+        if( p17 == 0 & p18 == 1 & p19 == 1 & p20 == 1){ //1000 Lowest Red
+            LPC_PWM1->MR4 = 10;
+            LPC_PWM1 -> LER |= 1 << 4;
+            LPC_PWM1->MR1 = 0;
+            LPC_PWM1 -> LER |= 1 << 1;
+            wait(0.8);
+            }
+        if( p17 == 0 & p18 == 1 & p19 == 1 & p20 == 0){ //1001
+            LPC_PWM1->MR4 = 100;
+            LPC_PWM1 -> LER |= 1 << 4;
+            LPC_PWM1->MR1 = 0;
+            LPC_PWM1 -> LER |= 1 << 1;
+            wait(0.8);
+            }
+        if( p17 == 0 & p18 == 1 & p19 == 0 & p20 == 1){ //1010
+            LPC_PWM1->MR4 = 200;
+            LPC_PWM1 -> LER |= 1 << 4;
+            LPC_PWM1->MR1 = 0;
+            LPC_PWM1 -> LER |= 1 << 1;
+            wait(0.8);
+            }
+        if( p17 == 0 & p18 == 1 & p19 == 0 & p20 == 0){ //1011
+            LPC_PWM1->MR4 = 400;
+            LPC_PWM1 -> LER |= 1 << 4;
+            LPC_PWM1->MR1 = 0;
+            LPC_PWM1 -> LER |= 1 << 1;
+            wait(0.8);
+            }
+        if( p17 == 0 & p18 == 0 & p19 == 1 & p20 == 1){ //1100
+            LPC_PWM1->MR4 = 800;
+            LPC_PWM1 -> LER |= 1 << 4;
+            LPC_PWM1->MR1 = 0;
+            LPC_PWM1 -> LER |= 1 << 1;
+            wait(0.8);
+            }
+        if( p17 == 0 & p18 == 0 & p19 == 1 & p20 == 0){ //1101
+            LPC_PWM1->MR4 = 1600;
+            LPC_PWM1 -> LER |= 1 << 4;
+            LPC_PWM1->MR1 = 0;
+            LPC_PWM1 -> LER |= 1 << 1;
+            wait(0.8);
+            }
+        if( p17 == 0 & p18 == 0 & p19 == 0 & p20 == 1){ //1110
+            LPC_PWM1->MR4 = 3200;
+            LPC_PWM1 -> LER |= 1 << 4;
+            LPC_PWM1->MR1 = 0;
+            LPC_PWM1 -> LER |= 1 << 1;
+            wait(0.8);
+            }
+        if( p17 == 0 & p18 == 0 & p19 == 0 & p20 == 0){ //1111 Highest Red
+            LPC_PWM1->MR4 = 6400;
+            LPC_PWM1 -> LER |= 1 << 4;
+            LPC_PWM1->MR1 = 0;
+            LPC_PWM1 -> LER |= 1 << 1;
+            wait(0.8);
+            }
+        
+        
+    }
+}
+ 

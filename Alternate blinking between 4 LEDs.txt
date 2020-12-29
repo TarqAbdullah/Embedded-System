@@ -1,0 +1,46 @@
+
+#include "mbed.h"
+
+int main() {
+    
+
+    //Set them to output.
+    LPC_GPIO1 -> FIODIR |= 1<< 18;  
+    LPC_GPIO1 -> FIODIR |= 1<< 20;  
+    LPC_GPIO1 -> FIODIR |= 1<< 21;  
+    LPC_GPIO1 -> FIODIR |= 1<< 23;  
+
+    
+ while(1) {
+        
+        
+                LPC_GPIO1 -> FIOSET |= 1<< 18;  
+                LPC_GPIO1 -> FIOCLR |= 1<< 20;  
+                LPC_GPIO1 -> FIOCLR |= 1<< 21; 
+                LPC_GPIO1 -> FIOCLR |= 1<< 23; 
+                wait(0.2);
+                
+                LPC_GPIO1 -> FIOCLR |= 1<< 18;  
+                LPC_GPIO1 -> FIOSET |= 1<< 20;  
+                LPC_GPIO1 -> FIOCLR |= 1<< 21;  
+                LPC_GPIO1 -> FIOCLR |= 1<< 23;  
+                wait(0.2);
+                
+                LPC_GPIO1 -> FIOCLR |= 1<< 18;  
+                LPC_GPIO1 -> FIOCLR |= 1<< 20;  
+                LPC_GPIO1 -> FIOSET |= 1<< 21;  
+                LPC_GPIO1 -> FIOCLR |= 1<< 23; 
+                wait(0.2);
+                
+                LPC_GPIO1 -> FIOCLR |= 1<< 18;  
+                LPC_GPIO1 -> FIOCLR |= 1<< 20;  
+                LPC_GPIO1 -> FIOCLR |= 1<< 21;  
+                LPC_GPIO1 -> FIOSET |= 1<< 23;  
+                wait(0.2);
+                                 
+            
+        
+    }
+
+
+}

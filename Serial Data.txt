@@ -1,0 +1,62 @@
+#include "mbed.h"
+// MOSI 0.18      MISO 0.17
+int main() {
+    
+    LPC_SC -> PCONP |= 0<<21; //Activate SSP0 by setting it LOW.
+    LPC_PINCON -> PINSEL1 |= (1<<3) | (1<<5); //Activate MISO0 MOSI0
+    LPC_SSP0 -> CR0 |= (1<<0) | (1<<1) | (1<<2); //8-bit transmisssion.
+    LPC_SSP0 -> CR1 |= 1<<1 ; //Activate SSP.
+    LPC_GPIO0 -> FIODIR |= 1<<16; //Make it output.
+    
+    while(1){
+        
+        LPC_SSP0 -> DR = 0x27; // .
+        
+        while( ((LPC_SSP0 -> SSR)&(1<<4)) == 1 ); //wait till transition is done Check BSY if 1 wait.
+        
+        LPC_SSP0 -> DR; //Read DR to clear dummy data.
+        LPC_SSP0 -> DR = 0x20; // Assign a value to DR write this to @0x20.
+        while( ((LPC_SSP0 -> SSR)&(1<<4)) == 1 ); //wait till transition is done Check BSY if 1 wait.
+        LPC_SSP0 -> DR = 0;//push dummy data to recieve the output.
+        LPC_SSP0 -> DR = 0;
+        int XL = LPC_SSP0 -> DR;
+        int XH = LPC_SSP0 -> DR;
+        XH = (XH << 8) | XL; //Make them one variable to be printed.
+        printf(" %d \n ", XH);
+        //////////////////////
+        LPC_SSP0 -> DR = 0; // .
+        
+        while( ((LPC_SSP0 -> SSR)&(1<<4)) == 1 ); //wait till transition is done Check BSY if 1 wait.
+        
+        LPC_SSP0 -> DR; //Read DR to clear dummy data.
+        LPC_SSP0 -> DR = 0x20; // Assign a value to DR write this to @0x20.
+        while( ((LPC_SSP0 -> SSR)&(1<<4)) == 1 ); //wait till transition is done Check BSY if 1 wait.
+        LPC_SSP0 -> DR = 0;//push dummy data to recieve the output.
+        LPC_SSP0 -> DR = 0;
+        int YL = LPC_SSP0 -> DR;
+        int YH = LPC_SSP0 -> DR;
+        YH = (YH << 8) | YL; //Make them one variable to be printed.
+        printf(" %d \n ", YH);
+        ///////////////////////
+        LPC_SSP0 -> DR = 0x27; // .
+        
+        while( ((LPC_SSP0 -> SSR)&(1<<4)) == 1 ); //wait till transition is done Check BSY if 1 wait.
+        
+        LPC_SSP0 -> DR; //Read DR to clear dummy data.
+        LPC_SSP0 -> DR = 0x20; // Assign a value to DR write this to @0x20.
+        while( ((LPC_SSP0 -> SSR)&(1<<4)) == 1 ); //wait till transition is done Check BSY if 1 wait.
+        LPC_SSP0 -> DR = 0;//push dummy data to recieve the output.
+        LPC_SSP0 -> DR = 0;
+        int ZL = LPC_SSP0 -> DR;
+        int ZH = LPC_SSP0 -> DR;
+        ZH = (ZH << 8) | ZL; //Make them one variable to be printed.
+        printf(" %d \n ", zH);
+        
+        LPC_SC -> PCONP |= 1<<21; //Deactivate SSP0 by setting it HIGH.
+    
+        }
+}    
+
+
+
+        
