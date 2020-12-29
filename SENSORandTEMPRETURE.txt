@@ -1,0 +1,43 @@
+#include "mbed.h"
+#include "Ping.h"
+
+Serial pc(USBTX, USBRX);
+DigitalOut RedLED(p20);
+Ping p(p21); //Ping object.
+char Input;
+double Tempreture;
+int main() {
+        ///
+        int range;
+        char input;
+        printf("Enter 'a' to start reading the distance\n\r");
+        ///
+        LPC_SC -> PCONP |= 1 << 12; // to power up ADC
+        LPC_PINCON -> PINSEL1 |= 1<<14; // to change the function to AD0.0. p15.
+        LPC_ADC -> ADCR = (1<<0) | (1<<21) | (1<<16) | (1<<10); // SEL , PDN , burst , CLKDIV(PCLK/(5) CLK must be < 13MHz).
+        LPC_GPIO1 -> FIODIR |= 1<< 18; // To change the direction of the LED.
+        double ADC_Result ;
+        printf("Enter 't' to print the tempreture\n\r");
+        while(1){
+            //
+            input = pc.getc();
+            //
+            ADC_Result = ( LPC_ADC -> ADDR0 >> 4 ) & 4095 ; //The result is in (4-15)bits.
+            Tempreture = ADC_Result*0.0122;
+            
+            if( Tempreture > 35 ){
+                printf("The tempreture is high, be careful!\n\r");
+                RedLED = 1;
+                }else{
+                RedLED = 0;
+            }
+            if(input == 'd'){
+                p.Send();
+                wait_ms(30);
+                range = p.Read_cm();
+                printf("The distance = %d cm\n\r", range);
+                if( range < 30 )
+                    printf("Too close be careful! \n\r");
+            } 
+        } 
+}            

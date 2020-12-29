@@ -1,0 +1,25 @@
+
+#include "mbed.h"
+
+DigitalOut leds[] = { (p22), (p23), (p24), (p25), (p26), (p27), (p28) };
+int number[11][8]={
+                    {1,1,1,0,1,1,1,0},          //zero
+                    {0,0,1,0,0,1,0,0},          //one
+                    {1,0,1,1,1,0,1,0},          //two
+                    {1,0,1,1,0,1,1,0},          //three
+                    {0,1,1,1,0,1,0,0},          //four
+                    {0,0,1,0,1,0,0,0},          //five
+                    {0,0,1,0,0,0,0,0},          //six
+                    {1,0,1,0,0,1,0,0},          //seven
+                    {1,1,1,1,1,1,1,0},          //eight
+                    {1,1,1,1,0,1,1,0},          //nine
+                    {0,0,0,0,0,0,0,1}          //dot
+                  };
+int main() {
+    while(1) {
+        for(int i = 0; i<7;i++){leds[i] = 1;}
+        
+            //display shows the number in this case 6
+        for (int i=0; i<7; i++){leds[i] = number[5][i];} 
+    }
+}
