@@ -1,5 +1,5 @@
 # Embedded-System
-Simple codes that implements specific roles that includes (PWM, ADC, Ultrasonic, etc.). 
+Different codes that implements specific roles that includes (PWM, ADC, Ultrasonic, etc.). 
 
 All codes here have been implemented and tested on `LPC1768` board form NXP. :pushpin:
 
