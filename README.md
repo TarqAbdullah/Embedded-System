@@ -1,7 +1,7 @@
 # Embedded-System
-Simple codes that implements specific roles. 
+Simple codes that implements specific roles that includes (PWM, ADC, Ultrasonic, etc.). 
 
-All codes here have been implemented and tested on LPC1768 board form NXP. :pushpin:
+All codes here have been implemented and tested on `LPC1768` board form NXP. `:pushpin:`
 
 They are  `.txt` extension.
 
